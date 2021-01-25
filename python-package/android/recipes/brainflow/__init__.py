@@ -6,7 +6,7 @@ class BrainflowRecipe(PythonRecipe):
     def version():
         return Recipe.get_recipe('libbrainflow', BrainflowRecipe.ctx).version
 
-    depends = ['libbrainflow']
+    depends = ['libbrainflow', 'numpy', 'nptyping', 'typish']
 
     call_hostpython_via_targetpython = True
 
