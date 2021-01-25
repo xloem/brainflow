@@ -1,12 +1,12 @@
-from os.path import exists, join
+from os.path import join
 import sh
-from pythonforandroid.recipe import NDKRecipe, PythonRecipe
+from pythonforandroid.recipe import Recipe
 from pythonforandroid.util import current_directory
 from pythonforandroid.logger import shprint
 from multiprocessing import cpu_count
 
 
-class LibBrainflowRecipe(NDKRecipe):
+class LibBrainflowRecipe(Recipe):
     version = '3.8.1'
     url = 'https://github.com/brainflow-dev/brainflow/archive/3.8.1.tar.gz'
     sha256sum = 'f635c891d01471dad17f6b0cea3088054764eff4180318d8f2f305ddded6db84'
@@ -37,11 +37,11 @@ class LibBrainflowRecipe(NDKRecipe):
 
     def install_libraries(self, arch):
         # place libraries in python package folder
-        libs = self.get_libraries(arch)
         libs_dir = join(
             self.get_build_dir(arch.arch),
             'python-package', 'brainflow', 'lib')
         shprint(sh.mkdir, '-p', libs_dir)
+        libs = self.get_libraries(arch)
         shprint(sh.cp, *libs, libs_dir)
 
 recipe = LibBrainflowRecipe()
