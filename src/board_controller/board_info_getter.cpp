@@ -17,6 +17,8 @@ inline int get_string_value (
     int board_id, const char *param_name, char *string, int *len, bool use_logger = true);
 inline int get_array_value (
     int board_id, const char *param_name, int *output_array, int *len, bool use_logger = true);
+inline int get_array_double_value (
+    int board_id, const char *param_name, double *output_array, int *len, double value_if_null, bool use_logger = true);
 
 
 int get_sampling_rate (int board_id, int *sampling_rate)
@@ -52,6 +54,26 @@ int get_timestamp_channel (int board_id, int *timestamp_channel)
 int get_eeg_names (int board_id, char *eeg_names, int *len)
 {
     return get_string_value (board_id, "eeg_names", eeg_names, len);
+}
+
+int get_row_names (int board_id, char *row_names, int *len)
+{
+    return get_string_value (board_id, "row_names", row_names, len);
+}
+
+int get_row_bitdepths_fixed(int board_id, int *row_bitdepths_fixed, int *len)
+{
+    return get_array_value (board_id, "row_bitdepths_fixed", row_bitdepths_fixed, len);
+}
+
+int get_row_minimums (int board_id, double *row_minimums, int *len)
+{
+    return get_array_double_value (board_id, "row_minimums", row_minimums, len, -1.0/0.0);
+}
+
+int get_row_maximums (int board_id, double *row_maximums, int *len)
+{
+    return get_array_double_value (board_id, "row_maximums", row_maximums, len, 1.0/0.0);
 }
 
 int get_device_name (int board_id, char *name, int *len)
@@ -187,6 +209,32 @@ inline int get_array_value (
             memcpy (output_array, &values[0], sizeof (int) * values.size ());
         }
         *len = (int)values.size ();
+        return (int)BrainFlowExitCodes::STATUS_OK;
+    }
+    catch (json::exception &e)
+    {
+        if (use_logger)
+        {
+            Board::board_logger->error (e.what ());
+        }
+        return (int)BrainFlowExitCodes::UNSUPPORTED_BOARD_ERROR;
+    }
+}
+
+inline int get_array_double_value (
+    int board_id, const char *param_name, double *output_array, int *len, double value_if_null, bool use_logger)
+{
+    try
+    {
+        json & values = 
+            brainflow_boards_json["boards"][int_to_string (board_id)][param_name];
+
+        *len = (int)values.size ();
+        for (int index = 0; index < *len; ++ index)
+        {
+            nlohmann::json & value = values[index];
+            output_array[index] = value.is_null () ? value_if_null : static_cast <double> (value);
+        }
         return (int)BrainFlowExitCodes::STATUS_OK;
     }
     catch (json::exception &e)

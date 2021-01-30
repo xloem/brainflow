@@ -300,6 +300,38 @@ class BoardControllerDLL(object):
             ndpointer(ctypes.c_int32)
         ]
 
+        self.get_row_names = self.lib.get_row_names
+        self.get_row_names.restype = ctypes.c_int
+        self.get_row_names.argtypes = [
+            ctypes.c_int,
+            ndpointer(ctypes.c_ubyte),
+            ndpointer(ctypes.c_int32)
+        ]
+
+        self.get_row_bitdepths_fixed = self.lib.get_row_bitdepths_fixed
+        self.get_row_bitdepths_fixed.restype = ctypes.c_int
+        self.get_row_bitdepths_fixed.argtypes = [
+            ctypes.c_int,
+            ndpointer(ctypes.c_int32),
+            ndpointer(ctypes.c_int32)
+        ]
+
+        self.get_row_minimums = self.lib.get_row_minimums
+        self.get_row_minimums.restype = ctypes.c_int
+        self.get_row_minimums.argtypes = [
+            ctypes.c_int,
+            ndpointer(ctypes.c_double),
+            ndpointer(ctypes.c_int32)
+        ]
+
+        self.get_row_maximums = self.lib.get_row_maximums
+        self.get_row_maximums.restype = ctypes.c_int
+        self.get_row_maximums.argtypes = [
+            ctypes.c_int,
+            ndpointer(ctypes.c_double),
+            ndpointer(ctypes.c_int32)
+        ]
+
         self.get_device_name = self.lib.get_device_name
         self.get_device_name.restype = ctypes.c_int
         self.get_device_name.argtypes = [
@@ -609,6 +641,77 @@ class BoardShim(object):
         if res != BrainflowExitCodes.STATUS_OK.value:
             raise BrainFlowError('unable to request info about this board', res)
         return string.tobytes().decode('utf-8')[0:string_len[0]].split(',')
+
+    @classmethod
+    def get_row_names(cls, board_id: int) -> List[str]:
+        """get names for all channels
+
+        :param board_id: Board Id
+        :type board_id: int
+        :return: channel names
+        :rtype: List[str]
+        :raises BrainFlowError: If this board has no such data exit code is UNSUPPORTED_BOARD_ERROR
+        """
+        string = numpy.zeros(4096).astype(numpy.ubyte)
+        string_len = numpy.zeros(1).astype(numpy.int32)
+        res = BoardControllerDLL.get_instance().get_row_names(board_id, string, string_len)
+        if res != BrainflowExitCodes.STATUS_OK.value:
+            raise BrainFlowError('unable to request info about this board', res)
+        return string.tobytes().decode('utf-8')[0:string_len[0]].split(',')
+
+    @classmethod
+    def get_row_bitdepths_fixed(cls, board_id: int) -> List[int]:
+        """get bitdepths of fixed-point channels
+
+        :param board_id: Board Id
+        :type board_id: int
+        :return: channel bitdepths, 0 if not fixed-point
+        :rtype: List[int]
+        :raises BrainFlowError: If this board has no such data exit code is UNSUPPORTED_BOARD_ERROR
+        """
+        num_channels = numpy.zeros(1).astype(numpy.int32)
+        bitdepths = numpy.zeros(512).astype(numpy.int32)
+
+        res = BoardControllerDLL.get_instance().get_row_bitdepths_fixed(board_id, bitdepths, num_channels)
+        if res != BrainflowExitCodes.STATUS_OK.value:
+            raise BrainFlowError('unable to request info about this board', res)
+        return bitdepths.tolist()[0:num_channels[0]]
+
+    @classmethod
+    def get_row_minimums(cls, board_id: int) -> List[float]:
+        """get minimum values of board channels
+
+        :param board_id: Board Id
+        :type board_id: int
+        :return: channel minimum values
+        :rtype: List[int]
+        :raises BrainFlowError: If this board has no such data exit code is UNSUPPORTED_BOARD_ERROR
+        """
+        num_channels = numpy.zeros(1).astype(numpy.int32)
+        minimums = numpy.zeros(512).astype(numpy.float64)
+
+        res = BoardControllerDLL.get_instance().get_row_minimums(board_id, minimums, num_channels)
+        if res != BrainflowExitCodes.STATUS_OK.value:
+            raise BrainFlowError('unable to request info about this board', res)
+        return minimums.tolist()[0:num_channels[0]]
+
+    @classmethod
+    def get_row_maximums(cls, board_id: int) -> List[float]:
+        """get maximum values of board channels
+
+        :param board_id: Board Id
+        :type board_id: int
+        :return: channel maximum values
+        :rtype: List[int]
+        :raises BrainFlowError: If this board has no such data exit code is UNSUPPORTED_BOARD_ERROR
+        """
+        num_channels = numpy.zeros(1).astype(numpy.int32)
+        maximums = numpy.zeros(512).astype(numpy.float64)
+
+        res = BoardControllerDLL.get_instance().get_row_maximums(board_id, maximums, num_channels)
+        if res != BrainflowExitCodes.STATUS_OK.value:
+            raise BrainFlowError('unable to request info about this board', res)
+        return maximums.tolist()[0:num_channels[0]]
 
     @classmethod
     def get_device_name(cls, board_id: int) -> str:
