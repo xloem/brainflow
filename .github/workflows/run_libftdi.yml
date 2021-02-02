@@ -31,6 +31,7 @@ jobs:
     - name: Install Macos Dependencies
       if: (matrix.os == 'macos-10.15')
       run: |
+        brew update
         brew install libftdi
       env:
         DEBIAN_FRONTEND: noninteractive
