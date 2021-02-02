@@ -59,18 +59,18 @@ public:
         spdlog::level::level_enum log_level, const char *fmt, const Arg1 &arg1, const Args &... args)
     // clang-format on
     {
-        if (!skip_logs)
-        {
-            Board::board_logger->log (log_level, fmt, arg1, args...);
-        }
+        //        if (!skip_logs)
+        //        {
+        Board::board_logger->log (log_level, fmt, arg1, args...);
+        //        }
     }
 
     template <typename T> void safe_logger (spdlog::level::level_enum log_level, const T &msg)
     {
-        if (!skip_logs)
-        {
-            Board::board_logger->log (log_level, msg);
-        }
+        //       if (!skip_logs)
+        //        {
+        Board::board_logger->log (log_level, msg);
+        //        }
     }
 
     int get_board_id ()
