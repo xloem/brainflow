@@ -315,8 +315,10 @@ set_target_properties (${ML_MODULE_NAME}
 )
 
 if (USE_LIBFTDIPP)
+    message (STATUS "Using LibFTDI++")
     find_package (LibFTDI1 NO_MODULE)
     if (LibFTDI1_FOUND)
+        message (STATUS "Including ${LIBFTDI_USE_FILE}")
         include ( ${LIBFTDI_USE_FILE} )
         target_link_libraries (${BOARD_CONTROLLER_NAME} PRIVATE ${LIBFTDIPP_LIBRARIES})
         target_compile_definitions (${BOARD_CONTROLLER_NAME} PRIVATE "USE_LIBFTDIPP")
