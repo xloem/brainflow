@@ -32,7 +32,7 @@ jobs:
       if: (matrix.os == 'macos-10.15')
       run: |
         brew update
-        brew install libftdi
+        brew install -d -v libftdi
       env:
         DEBIAN_FRONTEND: noninteractive
     - name: Setup Cmake
