@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.apache.commons.lang3.SystemUtils;
 
@@ -131,7 +132,7 @@ public class BoardShim
             unpack_from_jar (ganglion_name);
         }
 
-        instance = (DllInterface) Native.loadLibrary (lib_name, DllInterface.class);
+        instance = (DllInterface) Native.loadLibrary (lib_name, DllInterface.class, Collections.singletonMap(Library.OPTION_ALLOW_OBJECTS, Boolean.TRUE));
     }
 
     private static Path unpack_from_jar (String lib_name)
