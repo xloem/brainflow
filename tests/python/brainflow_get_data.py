@@ -8,6 +8,7 @@ from brainflow.data_filter import DataFilter, FilterTypes, AggOperations
 
 
 def main():
+    print('main!')
     BoardShim.enable_dev_board_logger()
 
     parser = argparse.ArgumentParser()
