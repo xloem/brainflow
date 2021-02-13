@@ -27,7 +27,7 @@ extern "C"
     enum libusb_option
     {
         LIBUSB_OPTION_WEAK_AUTHORITY = 2,
-        LIBUSB_OPTION_ANDROID_JNIENV = 9997
+        LIBUSB_OPTION_ANDROID_JNIENV = 3
     };
     int LIBUSB_CALL libusb_set_option (struct libusb_context *ctx, enum libusb_option option, ...);
 }
@@ -36,19 +36,23 @@ extern "C"
 // end libusb declarations
 //////
 
-LibFTDISerial::LibFTDISerial (const char *description, Board *board)
-    : description (description), port_open (false), board (board)
+static uint64_t libusb_version64 ()
 {
-    // convert the libusb version to a uint64_t for version checking
+    // convert the libusb version to a numerically orderable uint64_t
     libusb_version const &verobj = *libusb_get_version ();
     uint64_t usbver = 0;
     for (uint64_t verpart : {verobj.major, verobj.minor, verobj.micro, verobj.nano})
     {
         usbver = (usbver << 16) | verpart;
     }
+    return usbver;
+}
 
+LibFTDISerial::LibFTDISerial (const char *description, Board *board)
+    : description (description), port_open (false), ftdi_init (false), board (board)
+{
     // libusb_set_option was officially introduced in 1.0.22
-    if (usbver >= 0x00001000001600)
+    if (libusb_version64 () >= 0x00001000001600)
     {
         // on android, this disables device scan during usb_init, which lets it succeed
         libusb_set_option (ftdi.usb_ctx, LIBUSB_OPTION_WEAK_AUTHORITY, nullptr);
@@ -61,7 +65,10 @@ LibFTDISerial::LibFTDISerial (const char *description, Board *board)
                 log_error ("LibFTDISerial", "jnienv pointer set, passing");
                 // this is a prototype option for passing a JNIEnv pointer it.
                 // libusb will just return an error code if it doesn't recognise it
-                libusb_set_option (ftdi.usb_ctx, LIBUSB_OPTION_ANDROID_JNIENV, board->params.platform_ptr, nullptr);
+                libusb_set_option (ftdi.usb_ctx, LIBUSB_OPTION_ANDROID_JNIENV,
+                    board->params.platform_ptr, nullptr);
+                libusb_set_option (ftdi.usb_ctx, LIBUSB_OPTION_WEAK_AUTHORITY, -1,
+                    nullptr); // disable weak authority
             }
             else
             {
@@ -75,7 +82,11 @@ LibFTDISerial::LibFTDISerial (const char *description, Board *board)
     }
 
     // setup libftdi
-    if (ftdi_init (&ftdi) != 0)
+    if (::ftdi_init (&ftdi) == 0)
+    {
+        this->ftdi_init = true;
+    }
+    else
     {
         log_error ("LibFTDISerial");
     }
@@ -87,18 +98,32 @@ LibFTDISerial::~LibFTDISerial ()
     {
         ftdi_usb_close (&ftdi);
     }
-    ftdi_deinit (&ftdi);
+    if (ftdi_init)
+    {
+        ftdi_deinit (&ftdi);
+    }
 }
 
 bool LibFTDISerial::is_libftdi (const char *port_name)
 {
-    LibFTDISerial serial (port_name);
-    int open_result = ftdi_usb_open_string (&serial.ftdi, port_name);
+    struct ftdi_context ftdi;
+    if (libusb_version64 () >= 0x00001000001600)
+    {
+        // disable android functionality for string check
+        libusb_set_option (ftdi.usb_ctx, LIBUSB_OPTION_WEAK_AUTHORITY, nullptr);
+        libusb_set_option (ftdi.usb_ctx, LIBUSB_OPTION_ANDROID_JNIENV, nullptr, nullptr);
+    }
+    int init_result = ::ftdi_init (&ftdi);
+    int open_result = ftdi_usb_open_string (&ftdi, port_name);
     if (open_result == 0)
     {
-        ftdi_usb_close (&serial.ftdi);
+        ftdi_usb_close (&ftdi);
     }
-    else if (open_result == -12)
+    if (init_result == 0)
+    {
+        ftdi_deinit (&ftdi);
+    }
+    if (open_result == -12)
     {
         // failed to init libftdi; do a manual check
         if (port_name[0] == 0 || port_name[0] == '/')
