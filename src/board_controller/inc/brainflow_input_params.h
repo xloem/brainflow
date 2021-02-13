@@ -22,7 +22,7 @@ struct BrainFlowInputParams
     int timeout;
     std::string serial_number;
     std::string file;
-    void * platform_ptr;
+    void *platform_ptr;
 
     BrainFlowInputParams ()
     {

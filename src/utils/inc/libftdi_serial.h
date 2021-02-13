@@ -34,6 +34,7 @@ private:
     struct ftdi_context ftdi;
     std::string description;
     bool port_open;
+    bool ftdi_init;
     Board *board;
 #endif
 };
