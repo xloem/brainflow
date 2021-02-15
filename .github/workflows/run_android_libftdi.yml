@@ -3,7 +3,7 @@ name: Run libFTDI Android NDK
 on: [push, pull_request]
 
 jobs:
-  RunAndroid:
+  RunAndroidlibFTDI:
     runs-on: ${{ matrix.os }}
 
     strategy:
