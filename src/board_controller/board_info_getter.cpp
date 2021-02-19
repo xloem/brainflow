@@ -169,7 +169,7 @@ inline int get_single_value (int board_id, const char *param_name, int *value, b
     {
         if (use_logger)
         {
-            Board::board_logger->error (e.what ());
+            Board::board_logger ()->error (e.what ());
         }
         return (int)BrainFlowExitCodes::UNSUPPORTED_BOARD_ERROR;
     }
@@ -193,7 +193,7 @@ inline int get_array_value (
     {
         if (use_logger)
         {
-            Board::board_logger->error (e.what ());
+            Board::board_logger ()->error (e.what ());
         }
         return (int)BrainFlowExitCodes::UNSUPPORTED_BOARD_ERROR;
     }
@@ -213,7 +213,7 @@ inline int get_string_value (
     {
         if (use_logger)
         {
-            Board::board_logger->error (e.what ());
+            Board::board_logger ()->error (e.what ());
         }
         return (int)BrainFlowExitCodes::UNSUPPORTED_BOARD_ERROR;
     }
