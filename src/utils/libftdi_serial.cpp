@@ -8,6 +8,7 @@
 
 #include "board.h"
 
+#if defined(__ANDROID__)
 //////
 // libusb forward declarations
 //////
@@ -36,6 +37,18 @@ extern "C"
 // end libusb declarations
 //////
 
+/*
+// libusb_set_option could be loaded at runtime, which might be declared like this
+#ifdef _WIN32
+#include <libloaderapi.h>
+#define dimport(lib, func) GetProcAddress(GetModuleHandleA(#lib), #func)
+#else
+#include <dlfcn.h>
+#define dimport(lib, func) dlsym(nullptr, #func)
+#endif
+using libusb_set_option_t = int(*)(struct libusb_context *ctx, enum libusb_option option, ...);
+*/
+
 static uint64_t libusb_version64 ()
 {
     // convert the libusb version to a numerically orderable uint64_t
@@ -47,13 +60,17 @@ static uint64_t libusb_version64 ()
     }
     return usbver;
 }
+#endif
 
 LibFTDISerial::LibFTDISerial (const char *description, Board *board)
     : description (description), port_open (false), ftdi_init (false), board (board)
 {
+#if defined(__ANDROID__)
     // libusb_set_option was officially introduced in 1.0.22
-    if (libusb_version64 () >= 0x00001000001600)
+    if (libusb_version64 () >= 0x0001000000160000)
     {
+        /* libusb_set_option_t libusb_set_option; // this was for the dynlib approach */
+
         // on android, this disables device scan during usb_init, which lets it succeed
         libusb_set_option (ftdi.usb_ctx, LIBUSB_OPTION_WEAK_AUTHORITY, nullptr);
 
@@ -80,6 +97,7 @@ LibFTDISerial::LibFTDISerial (const char *description, Board *board)
     {
         log_error ("LibFTDISerial", "usb version is too old to set options");
     }
+#endif
 
     // setup libftdi
     if (::ftdi_init (&ftdi) == 0)
@@ -107,12 +125,14 @@ LibFTDISerial::~LibFTDISerial ()
 bool LibFTDISerial::is_libftdi (const char *port_name)
 {
     struct ftdi_context ftdi;
+#if defined(__ANDROID__)
     if (libusb_version64 () >= 0x00001000001600)
     {
         // disable android functionality for string check
         libusb_set_option (ftdi.usb_ctx, LIBUSB_OPTION_WEAK_AUTHORITY, nullptr);
         libusb_set_option (ftdi.usb_ctx, LIBUSB_OPTION_ANDROID_JNIENV, nullptr, nullptr);
     }
+#endif
     int init_result = ::ftdi_init (&ftdi);
     int open_result = ftdi_usb_open_string (&ftdi, port_name);
     if (open_result == 0)

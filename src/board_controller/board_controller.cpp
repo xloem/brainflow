@@ -281,9 +281,11 @@ int get_board_data (
     return board_it->second->get_board_data (data_count, data_buf);
 }
 
+#include <iostream>
 int set_log_level (int log_level)
 {
     std::lock_guard<std::mutex> lock (mutex);
+    std::cout << "board_controller: set_log_level" << std::endl;
     return Board::set_log_level (log_level);
 }
 

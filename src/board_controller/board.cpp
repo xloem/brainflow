@@ -26,8 +26,10 @@ std::shared_ptr<spdlog::logger> &Board::board_logger ()
     return logger;
 }
 
+#include <iostream>
 int Board::set_log_level (int level)
 {
+    std::cout << "board: set_log_level " << level << std::endl;
     int log_level = level;
     if (level > 6)
     {
@@ -39,11 +41,15 @@ int Board::set_log_level (int level)
     }
     try
     {
+        std::cout << "set_level" << std::endl;
+        std::cout << "board_logger = " << Board::board_logger () << std::endl;
         Board::board_logger ()->set_level (spdlog::level::level_enum (log_level));
+        std::cout << "flush_on" << std::endl;
         Board::board_logger ()->flush_on (spdlog::level::level_enum (log_level));
     }
     catch (...)
     {
+        std::cout << "caught exception" << std::endl;
         return (int)BrainFlowExitCodes::GENERAL_ERROR;
     }
     return (int)BrainFlowExitCodes::STATUS_OK;
