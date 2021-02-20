@@ -42,16 +42,13 @@ def main():
     board = BoardShim(args.board_id, params)
     board.prepare_session()
 
-    print('starting streaming')
     board.start_stream(45000, args.streamer_params)
     for i in range(10):
         time.sleep(1)
         board.insert_marker(i + 1)
     data = board.get_board_data()
     board.stop_stream()
-    print('releasing session')
     board.release_session()
-    print('printing data')
 
     print(data)
 

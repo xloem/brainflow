@@ -8,13 +8,9 @@ from brainflow.data_filter import DataFilter, FilterTypes, AggOperations
 
 
 def main():
-    print('get_data main')
-    print('enabling dev logger')
     BoardShim.enable_dev_board_logger()
-    print('dev logger enabled')
 
     parser = argparse.ArgumentParser()
-    print('parser constructed')
     # use docs to check which parameters are required for specific board, e.g. for Cyton - set serial port
     parser.add_argument('--timeout', type=int, help='timeout for device discovery or connection', required=False,
                         default=0)
@@ -30,12 +26,9 @@ def main():
     parser.add_argument('--board-id', type=int, help='board id, check docs to get a list of supported boards',
                         required=True)
     parser.add_argument('--file', type=str, help='file', required=False, default='')
-    print('parsing')
     args = parser.parse_args()
-    print('parsed, constructing inputparams')
 
     params = BrainFlowInputParams()
-    print('input params object constructed, assigning values')
     params.ip_port = args.ip_port
     params.serial_port = args.serial_port
     params.mac_address = args.mac_address
@@ -46,12 +39,8 @@ def main():
     params.timeout = args.timeout
     params.file = args.file
 
-    print('constructing board')
-
     board = BoardShim(args.board_id, params)
     board.prepare_session()
-
-    print('starting streaming')
 
     # board.start_stream () # use this for default options
     board.start_stream(45000, args.streamer_params)
@@ -59,10 +48,7 @@ def main():
     # data = board.get_current_board_data (256) # get latest 256 packages or less, doesnt remove them from internal buffer
     data = board.get_board_data()  # get all data and remove it from internal buffer
     board.stop_stream()
-    print('releasing session')
     board.release_session()
-
-    print('printing data')
 
     print(data)
 
