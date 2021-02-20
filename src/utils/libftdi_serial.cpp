@@ -63,7 +63,7 @@ static uint64_t libusb_version64 ()
 #endif
 
 LibFTDISerial::LibFTDISerial (const char *description, Board *board)
-    : description (description), port_open (false), ftdi_init (false), board (board)
+    : description (description), port_open (false), lib_init (false), board (board)
 {
 #if defined(__ANDROID__)
     // libusb_set_option was officially introduced in 1.0.22
@@ -100,9 +100,9 @@ LibFTDISerial::LibFTDISerial (const char *description, Board *board)
 #endif
 
     // setup libftdi
-    if (::ftdi_init (&ftdi) == 0)
+    if (ftdi_init (&ftdi) == 0)
     {
-        this->ftdi_init = true;
+        lib_init = true;
     }
     else
     {
@@ -116,7 +116,7 @@ LibFTDISerial::~LibFTDISerial ()
     {
         ftdi_usb_close (&ftdi);
     }
-    if (ftdi_init)
+    if (lib_init)
     {
         ftdi_deinit (&ftdi);
     }
@@ -133,7 +133,7 @@ bool LibFTDISerial::is_libftdi (const char *port_name)
         libusb_set_option (ftdi.usb_ctx, LIBUSB_OPTION_ANDROID_JNIENV, nullptr, nullptr);
     }
 #endif
-    int init_result = ::ftdi_init (&ftdi);
+    int init_result = ftdi_init (&ftdi);
     int open_result = ftdi_usb_open_string (&ftdi, port_name);
     if (open_result == 0)
     {
