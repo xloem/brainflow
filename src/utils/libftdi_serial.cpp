@@ -77,13 +77,13 @@ LibFTDISerial::LibFTDISerial (const char *description, Board *board)
         if (board != nullptr)
         {
             log_error ("LibFTDISerial", "looking for jnienv");
-            if (board->params.platform_ptr != nullptr)
+            if (board->get_params ().platform_ptr != nullptr)
             {
                 log_error ("LibFTDISerial", "jnienv pointer set, passing");
                 // this is a prototype option for passing a JNIEnv pointer it.
-                // libusb will just return an error code if it doesn't recognise it
+                // libusb will just return an ignored error code if it doesn't recognise it
                 libusb_set_option (ftdi.usb_ctx, LIBUSB_OPTION_ANDROID_JNIENV,
-                    board->params.platform_ptr, nullptr);
+                    board->get_params ().platform_ptr, nullptr);
                 libusb_set_option (ftdi.usb_ctx, LIBUSB_OPTION_WEAK_AUTHORITY, -1,
                     nullptr); // disable weak authority
             }
