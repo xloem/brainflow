@@ -103,7 +103,7 @@ int Board::prepare_for_acquisition (int buffer_size, char *streamer_params)
     }
     catch (json::exception &e)
     {
-        safe_logger (spdlog::level::err, e.what ());
+        safe_logger (spdlog::level::err, "%s board_id=%u", e.what (), brainflow_boards_json);
         return (int)BrainFlowExitCodes::GENERAL_ERROR;
     }
 
