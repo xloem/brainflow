@@ -21,7 +21,7 @@
 class Board
 {
 public:
-    static std::shared_ptr<spdlog::logger> &board_logger ();
+    static std::shared_ptr<spdlog::logger> board_logger;
     static int set_log_level (int log_level);
     static int set_log_file (char *log_file);
 
@@ -61,7 +61,7 @@ public:
     {
         if (!skip_logs)
         {
-            Board::board_logger ()->log (log_level, fmt, arg1, args...);
+            Board::board_logger->log (log_level, fmt, arg1, args...);
         }
     }
 
@@ -69,7 +69,7 @@ public:
     {
         if (!skip_logs)
         {
-            Board::board_logger ()->log (log_level, msg);
+            Board::board_logger->log (log_level, msg);
         }
     }
 

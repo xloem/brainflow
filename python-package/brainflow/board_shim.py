@@ -446,7 +446,6 @@ class BoardShim(object):
         :param log_level: log level, to specify it you should use values from LogLevels enum
         :type log_level: int
         """
-        print('setting board controller log level to', log_level)
         res = BoardControllerDLL.get_instance().set_log_level(log_level)
         if res != BrainflowExitCodes.STATUS_OK.value:
             raise BrainFlowError('unable to enable logger', res)

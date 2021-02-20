@@ -14,22 +14,14 @@
 
 #ifdef __ANDROID__
 #include "spdlog/sinks/android_sink.h"
-#endif
-
-std::shared_ptr<spdlog::logger> &Board::board_logger ()
-{
-#ifdef __ANDROID__
-    static auto logger = spdlog::android_logger (LOGGER_NAME, "brainflow_ndk_logger");
+std::shared_ptr<spdlog::logger> Board::board_logger =
+    spdlog::android_logger (LOGGER_NAME, "brainflow_ndk_logger");
 #else
-    static auto logger = spdlog::stderr_logger_mt (LOGGER_NAME);
+std::shared_ptr<spdlog::logger> Board::board_logger = spdlog::stderr_logger_mt (LOGGER_NAME);
 #endif
-    return logger;
-}
 
-#include <iostream>
 int Board::set_log_level (int level)
 {
-    std::cout << "board: set_log_level " << level << std::endl;
     int log_level = level;
     if (level > 6)
     {
@@ -41,15 +33,11 @@ int Board::set_log_level (int level)
     }
     try
     {
-        std::cout << "set_level" << std::endl;
-        std::cout << "board_logger = " << Board::board_logger () << std::endl;
-        Board::board_logger ()->set_level (spdlog::level::level_enum (log_level));
-        std::cout << "flush_on" << std::endl;
-        Board::board_logger ()->flush_on (spdlog::level::level_enum (log_level));
+        Board::board_logger->set_level (spdlog::level::level_enum (log_level));
+        Board::board_logger->flush_on (spdlog::level::level_enum (log_level));
     }
     catch (...)
     {
-        std::cout << "caught exception" << std::endl;
         return (int)BrainFlowExitCodes::GENERAL_ERROR;
     }
     return (int)BrainFlowExitCodes::STATUS_OK;
@@ -58,18 +46,18 @@ int Board::set_log_level (int level)
 int Board::set_log_file (char *log_file)
 {
 #ifdef __ANDROID__
-    Board::board_logger ()->error ("For Android set_log_file is unavailable");
+    Board::board_logger->error ("For Android set_log_file is unavailable");
     return (int)BrainFlowExitCodes::GENERAL_ERROR;
 #else
     try
     {
-        spdlog::level::level_enum level = Board::board_logger ()->level ();
-        Board::board_logger () = spdlog::create<spdlog::sinks::null_sink_st> (
+        spdlog::level::level_enum level = Board::board_logger->level ();
+        Board::board_logger = spdlog::create<spdlog::sinks::null_sink_st> (
             "null_logger"); // to dont set logger to nullptr and avoid race condition
         spdlog::drop (LOGGER_NAME);
-        Board::board_logger () = spdlog::basic_logger_mt (LOGGER_NAME, log_file);
-        Board::board_logger ()->set_level (level);
-        Board::board_logger ()->flush_on (level);
+        Board::board_logger = spdlog::basic_logger_mt (LOGGER_NAME, log_file);
+        Board::board_logger->set_level (level);
+        Board::board_logger->flush_on (level);
         spdlog::drop ("null_logger");
     }
     catch (...)
