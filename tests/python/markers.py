@@ -1,6 +1,7 @@
 import argparse
 import time
 import numpy as np
+import sys
 
 import brainflow
 from brainflow.board_shim import BoardShim, BrainFlowInputParams
@@ -8,6 +9,8 @@ from brainflow.data_filter import DataFilter, FilterTypes, AggOperations
 
 
 def main():
+    print('markers main')
+    sys.stderr.write('markers main stderr\n')
     BoardShim.enable_dev_board_logger()
 
     parser = argparse.ArgumentParser()
