@@ -3,7 +3,7 @@ name: Run Unix
 on: [push, pull_request]
 
 jobs:
-  RunUnix13
+  RunUnix13:
     runs-on: ${{ matrix.os }}
 
     strategy:
