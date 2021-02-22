@@ -3,7 +3,7 @@ name: Run Unix
 on: [push, pull_request]
 
 jobs:
-  RunUnix4:
+  RunUnix_4:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -23,7 +23,7 @@ jobs:
         architecture: 'x64'
     - name: Install Dependencies
       run: |
-        brew install gdb
+        brew install libunwind-headers
     - name: Install Julia
       uses: julia-actions/setup-julia@v1
       with:
