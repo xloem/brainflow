@@ -316,11 +316,26 @@ set_target_properties (${ML_MODULE_NAME}
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/compiled
 )
 
+include(FindPkgConfig)
+if (PKG_CONFIG_FOUND)
+    # enable libsegfault to show backtaces if libunwind is available
+    pkg_check_modules (LIBUNWIND IMPORTED_TARGET libunwind)
+    if (LIBUNWIND_FOUND)
+        target_link_libraries (${BOARD_CONTROLLER_NAME} PRIVATE PkgConfig::LIBUNWIND)
+        list (APPEND BOARD_CONTROLLER_SRC ${CMAKE_HOME_DIRECTORY}/third_party/libsegfault/libsegfault.c)
+    endif (LIBUNWIND_FOUND)
+endif (PKG_CONFIG_FOUND)
+
 if (USE_LIBFTDI)
     find_package (LibFTDI1 NO_MODULE)
     if (LibFTDI1_FOUND)
         # this line could set up the directories if included before targets are defined
         #include ( ${LIBFTDI_USE_FILE} )
+
+        # this works around a bug in some installations of libftdi++ 1.5
+        # http://developer.intra2net.com/git/?p=libftdi;a=commit;h=cdb28383402d248dbc6062f4391b038375c52385
+        set (LIBFTDI_INCLUDE_DIRS ${LIBFTDI_INCLUDE_DIRS} ${LIBFTDI_INCLUDE_DIR}/../libftdi1)
+
         target_compile_definitions (${BOARD_CONTROLLER_NAME} PRIVATE ${LIBFTDI_DEFINITIONS} "USE_LIBFTDI")
         target_include_directories (${BOARD_CONTROLLER_NAME} PRIVATE ${LIBFTDI_INCLUDE_DIRS})
         target_link_directories (${BOARD_CONTROLLER_NAME} PRIVATE ${LIBFTDI_LIBRARY_DIRS})
