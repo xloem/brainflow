@@ -316,6 +316,16 @@ set_target_properties (${ML_MODULE_NAME}
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/compiled
 )
 
+include(FindPkgConfig)
+if (PKG_CONFIG_FOUND)
+    # enable libsegfault to show backtaces if libunwind is available
+    pkg_check_modules (LIBUNWIND IMPORTED_TARGET libunwind)
+    if (LIBUNWIND_FOUND)
+        target_link_libraries (${BOARD_CONTROLLER_NAME} PRIVATE PkgConfig::LIBUNWIND)
+        list (APPEND BOARD_CONTROLLER_SRC ${CMAKE_HOME_DIRECTORY}/third_party/libsegfault/libsegfault.c)
+    endif (LIBUNWIND_FOUND)
+endif (PKG_CONFIG_FOUND)
+
 if (USE_LIBFTDI)
     find_package (LibFTDI1 NO_MODULE)
     if (LibFTDI1_FOUND)
