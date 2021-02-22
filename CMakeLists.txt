@@ -317,11 +317,7 @@ set_target_properties (${ML_MODULE_NAME}
 )
 
 if (USE_LIBFTDI)
-    if (LIBFTDI_LIBRARIES)
-      set (LibFTDI1_FOUND 1)
-    else (LIBFTDI_LIBRARIES)
-      find_package (LibFTDI1 NO_MODULE)
-    endif (LIBFTDI_LIBRARIES)
+    find_package (LibFTDI1 NO_MODULE)
     if (LibFTDI1_FOUND)
         # this line could set up the directories if included before targets are defined
         #include ( ${LIBFTDI_USE_FILE} )
@@ -335,7 +331,7 @@ if (USE_LIBFTDI)
         target_link_directories (${BOARD_CONTROLLER_NAME} PRIVATE ${LIBFTDI_LIBRARY_DIRS})
         target_link_libraries (${BOARD_CONTROLLER_NAME} PRIVATE ${LIBFTDI_LIBRARIES})
     else (LibFTDI1_FOUND)
-        message (FATAL_ERROR "USE_LIBFTDI set but LibFTDI not found (missing: LIBFTDI_LIBRARIES).")
+        message (FATAL_ERROR "USE_LIBFTDI set but LibFTDI not found.")
     endif (LibFTDI1_FOUND)
 endif (USE_LIBFTDI)
 
