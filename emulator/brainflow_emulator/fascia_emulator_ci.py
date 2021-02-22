@@ -10,17 +10,23 @@ import struct
 
 from brainflow_emulator.emulate_common import TestFailureError, log_multilines
 
-
-def test_socket(cmd_list):
+def run(*cmd_list, shell=False, input=None):
     logging.info('Running %s' % ' '.join([str(x) for x in cmd_list]))
-    process = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = process.communicate()
+    process = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=shell)
+    stdout, stderr = process.communicate(input=input)
 
     log_multilines(logging.info, stdout)
     log_multilines(logging.info, stderr)
 
-    if process.returncode != 0:
-        raise TestFailureError('Test failed with exit code %s' % str(process.returncode), process.returncode)
+    return stdout, stderr, process.returncode
+
+def test_socket(cmd_list):
+
+    run('ulimit -c unlimited', shell=True)
+    stdout, stderr, returncode = run(*cmd_list)
+
+    if returncode != 0:
+        raise TestFailureError('Test failed with exit code %s' % str(returncode), returncode)
 
     return stdout, stderr
 
