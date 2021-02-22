@@ -26,9 +26,7 @@ def test_socket(cmd_list):
     stdout, stderr, returncode = run(*cmd_list)
 
     if returncode != 0:
-        # libsegfault would be better, it doesn't require user installed gdb [should be normal to include something like that]
-        gdb_output = run('gdb', cmd_list[0], 'core', input='backtrace\nquit\n')
-        raise TestFailureError('Test failed with exit code %s' % str(process.returncode), process.returncode)
+        raise TestFailureError('Test failed with exit code %s' % str(returncode), returncode)
 
     return stdout, stderr
 
