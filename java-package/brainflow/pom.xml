@@ -6,6 +6,7 @@
   <name>brainflow</name>
   <description>java binding for brainflow library</description>
   <url>https://brainflow.org/</url>
+  <packaging>aar</packaging>
 
   <licenses>
     <license>
@@ -118,6 +119,13 @@
             </execution>
         </executions>
       </plugin>  
+
+      <plugin>
+        <groupId>com.simpligility.maven.plugins</groupId>
+        <artifactId>android-maven-plugin</artifactId>
+        <version>4.4.3</version>
+        <extensions>true</extensions>
+      </plugin>
   </plugins>
 
   </build>
